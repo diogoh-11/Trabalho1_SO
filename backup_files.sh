@@ -1,4 +1,6 @@
 #!/bin/bash
+. ./rm_old_files.sh
+
 checking=false
 
 while getopts "c" option; do
@@ -24,13 +26,31 @@ if [ $# -gt 2 ] || ! [ -d $dir_trabalho ] || ! [ -d $dir_backup ]; then
     exit    
 fi
 
+rm_old_files $dir_trabalho $dir_backup $checking
+
 for file in "$dir_trabalho"/*; do
-    if [ -f "$file" ]; then  
-        fname="${file##*/}"
-        echo "File name: $fname"
-        #Ideia: criar 2 funções, uma que verifique se ja existe no dir de backup um ficherio com o mesmo nome
-        # outra que compare as os dois ficheiros com o mesmo nome e retorne aquele com a data de modificação mais recente
-        # ??? prompt a perguntar se deseja substitui ficheiro 
+        
+    fname="${file##*/}"
+
+    if [ -e "$dir_backup/$fname" ]; then        # verifica se existe no diretório de backup um ficheiro com o mesmo nome
+        backed_file=$dir_backup/$fname
+        if [ $fname -nt $backed_file ]; then    # ve se o ficheiro no dir trabalho é mais recente que o ficherio com o mesmo nome no dir de backup
+            if $checking; then
+                echo "rm $backed_file"          # printa os comandos estando no modo checking
+                echo "cp -a $fname $dir_backup"
+            else
+                rm "$backed_file"               # executa os comandos não estando no modo checking
+                cp -a "$fname" "$dir_backup"
+            fi
+        fi
+
+    else                                        # não existe no dir de backup um ficherio com o mesmo nome
+        if $checking; then
+            echo "cp -a $fname $dir_backup"     # printa os comandos estando no modo checking
+        else
+            cp -a "$fname" "$dir_backup"          # executa os comandos não estando no modo checking
+        fi
     fi
+
 done
 
