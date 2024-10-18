@@ -1,9 +1,10 @@
 #!/bin/bash
+checking=false
 
 while getopts "c" option; do
     case $option in
         c)
-            echo "Opção de checking ativa!"
+            checking=true
             ;;
         *)
             echo "Usage: $0 [-c] dir_trabalho dir_backup"
@@ -12,5 +13,13 @@ while getopts "c" option; do
 done
 
 #validação dos argumentos:
+shift $((OPTIND - 1))
+dir_trabalho="$1"
+dir_backup="$2"
 
-#if [-d ]
+if ! [ -d $dir_trabalho ] || ! [ -d $dir_backup ]; then
+    echo "Os agrumentos passados não são diretórios!"
+    echo "Usage: $0 [-c] dir_trabalho dir_backup"
+    exit    
+fi
+
