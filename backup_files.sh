@@ -3,20 +3,20 @@
 
 checking=false
 
-while getopts "c" option; do
+while getopts "c" option; do                                # itera sobre as opções passadas na linha de comandos e armazena em option 
     case $option in
         c)
-            checking=true
+            checking=true                                   # modo checking 
             ;;
         *)
-            echo "Usage: $0 [-c] dir_trabalho dir_backup"
+            echo "Usage: $0 [-c] dir_trabalho dir_backup"   # argumentos inválidos
             exit
             ;;
     esac
 done
 
 #validação dos argumentos:
-shift $((OPTIND - 1))
+shift $((OPTIND - 1))                                       # remove os argumentos iterados no loop anterior ou seja fica só com os diretorios
 dir_trabalho="$1"
 dir_backup="$2"
 
@@ -31,7 +31,7 @@ if [ -z "$( ls -A $dir_trabalho )" ]; then
     exit 0
 fi
 
-rm_old_files $dir_trabalho $dir_backup $checking
+rm_old_files $dir_trabalho $dir_backup $checking            # remove os ficheiros que já não estou no dir_trabalho da backup
 
 for file in "$dir_trabalho"/*; do
         
