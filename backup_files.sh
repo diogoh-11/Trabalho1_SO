@@ -9,7 +9,7 @@ while getopts "c" option; do                                # itera sobre as op�
             checking=true                                   # modo checking 
             ;;
         *)
-            echo "Usage: $0 [-c] dir_trabalho dir_backup"   # modo de execução
+            echo "Usage: $0 [-c] dir_trabalho dir_backup"   # argumentos inválidos
             exit
             ;;
     esac
