@@ -41,17 +41,17 @@ for file in "$dir_trabalho"/*; do
         
     fname="${file##*/}"                                     # remove o prefixo do caminho deixando apenas o nome do arquivo
 
-    if [ "$fname" = "$tfile" ] || ! [ "$tfile" =~ "notfile" ]; then
+    if [ "$fname" = "$tfile" ] ||  [ "$tfile" != "notfile" ]; then
         continue;   
     fi                                
 
     
-    if [ "$fname" =~ "$regexpr" ] || [ "$regexpr" =~ "noregularExp"] ; then      # vê se a expressão regular é igual se encontra no ficheiro dado
+    if [[ "$fname" =~ "$regexpr"  ||  "$regexpr" =~ "noregularExp" ]] ; then      # vê se a expressão regular é igual se encontra no ficheiro dado
         echo "$fname corresponde à expressão regular."
 
         if [ -e "$dir_backup/$fname" ]; then                    # verifica se existe no diretório de backup um ficheiro com o mesmo nome
             backed_file=$dir_backup/$fname
-            if [ $fname -nt $backed_file && $fname]; then                # ve se o ficheiro no dir trabalho é mais recente que o ficheiro com o mesmo nome no dir de backup || nt--> newer than
+            if [ "$fname" -nt "$backed_file" ]; then                # ve se o ficheiro no dir trabalho é mais recente que o ficheiro com o mesmo nome no dir de backup || nt--> newer than
                 if $checking; then
                     echo "rm -r \"$backed_file\""                      # printa os comandos estando no modo checking
                     echo "cp -a \"$fname\" \"$dir_backup\""
