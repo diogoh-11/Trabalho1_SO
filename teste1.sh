@@ -18,14 +18,3 @@ while getopts "ab:c:" option; do  # The colon after 'b' means it expects an argu
   esac
 done
 
-# função que compara dois ficherios com o mesmo nome e retorna aquele que é mais recente
-comp_files(){
-    file1=$1; file2=$2
-    date_file1=$(date -r $file1 "+%m-%d-%Y %H:%M:%S")
-    date_file2=$(date -r $file2 "+%m-%d-%Y %H:%M:%S")
-    echo "$date_file1"
-    echo "$date_file2"
-}
-
-comp_files $1 $2
-
