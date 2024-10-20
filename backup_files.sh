@@ -36,7 +36,6 @@ rm_old_files $dir_trabalho $dir_backup $checking            # remove os ficheiro
 for file in "$dir_trabalho"/*; do
         
     fname="${file##*/}"
-    fnameWithPath="$dir_trabalho/$fname"
 
     if [ -e "$dir_backup/$fname" ]; then        # verifica se existe no diretório de backup um ficheiro com o mesmo nome
         backed_file=$dir_backup/$fname
