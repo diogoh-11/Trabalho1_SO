@@ -4,6 +4,7 @@
 checking=false 
 tfile="notfile"
 regexpr="noregularExp"                                            # variavel para detetar o uso de -r      
+declare -a dont_update  # Standard indexed array
 
 while getopts "cb:r:" option; do                           # itera sobre as opções passadas na linha de comandos e armazena em option 
     case $option in
@@ -11,7 +12,15 @@ while getopts "cb:r:" option; do                           # itera sobre as opç
             checking=true                                  # modo checking 
             ;;
         b)
-            tfile="$OPTARG"                             # Lê o ficheiro ou diretorio passado que não deve ter backup
+            tfile="$OPTARG"                             # Lê o ficheiro ou diretorio passado que contem nome dos ficheiros que n devem ser atualizados
+            if [ -f "$tfile" ] && ! [ -z "$tfile" ]; then
+                index=0
+
+                while read -r line; do 
+                    dont_update[$index]="$line"         # coloca num array "dont_update" o nome dos ficheiros que não serão atualizados no backup
+                    index=$(($index+1))
+                done < "$tfile"
+            fi
             ;;
         r)  
             regexpr="$OPTARG"                           # Lê a expressão regular passada
