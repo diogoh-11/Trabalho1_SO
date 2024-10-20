@@ -1,5 +1,5 @@
 #!/bin/bash
-
+. ./in_array.sh
 # Using getopts to handle custom flags
 while getopts "ab:c:" option; do  # The colon after 'b' means it expects an argument.
   case $option in
@@ -17,4 +17,17 @@ while getopts "ab:c:" option; do  # The colon after 'b' means it expects an argu
       ;;
   esac
 done
+
+myArray=("file1.txt" "file2.txt" "file3.txt" "file4.txt")
+file="file2.txt"
+in_array "$file" "${myArray[@]}" 
+ret_val=$?
+
+echo "$ret_val"
+
+if [ $ret_val -eq 1 ]; then
+  echo "$file encontra-se na lista!"
+else
+  echo "$file não se encontra-se na lista!"
+fi
 
