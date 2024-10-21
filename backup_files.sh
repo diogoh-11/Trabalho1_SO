@@ -33,7 +33,7 @@ fi
 
 rm_old_files $dir_trabalho $dir_backup $checking            # remove os ficheiros que já não estou no dir_trabalho da backup
 
-for file in "$dir_trabalho"/*; do
+for file in "$dir_trabalho"/{*,.*}; do
 
     fname="${file##*/}"
 
