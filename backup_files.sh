@@ -20,7 +20,7 @@ shift $((OPTIND - 1))                                       # remove os argument
 dir_trabalho="$1"
 dir_backup="$2"
 
-if [ $# -gt 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
+if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     echo ">> INVALID ARGUMENTS!!!"
     echo ">> Usage: $0 [-c] dir_trabalho dir_backup"
     exit 1
@@ -54,7 +54,9 @@ for file in "$dir_trabalho"/{*,.*}; do
             fi
         
         else    
-            echo -e "\n>> File \"$file\" doesn't need backing up!"
+            if ! $checking; then
+                echo -e "\n>> File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro
+            fi
         fi
 
     else                                        # não existe no dir de backup um ficherio com o mesmo nome

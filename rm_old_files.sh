@@ -10,7 +10,7 @@ rm_old_files(){
     checking="$3"
 
     if ! [ -z "$( ls -A $dir_backup )" ]; then             # garante q o dir n está vazio
-        for file in "$dir_backup"/*; do
+        for file in "$dir_backup"/{*,.*}; do
             fname="${file##*/}"
 
             if ! [ -e "$dir_trabalho/$fname" ]; then        # verifica se o ficherio ainda existe no dir de trabalho
