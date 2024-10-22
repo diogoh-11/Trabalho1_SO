@@ -5,3 +5,9 @@ https://www.uptimia.com/questions/how-to-compare-file-dates-in-bash
 https://superuser.com/questions/352289/bash-scripting-test-for-empty-directory
 https://www.masteringunixshell.net/qa40/bash-how-to-pass-array-to-function.html
 
+# Ativa a opção para pegar arquivos e pastas ocultas
+        shopt -s dotglob
+
+# Desativa a opção para pegar arquivos e pastas ocultas
+        shopt -u dotglob
+

@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./rm_old_files.sh
+. ./rm_old_files2.sh
 . ./in_array.sh
 
 checking=false 
@@ -54,6 +54,9 @@ fi
 #rm_old_files $dir_trabalho $dir_backup $checking $dont_update $tfile $regexpr           # remove os ficheiros que já não estou no dir_trabalho da backup
 
 echo "---------------Current dir: $dir_trabalho-------------------------"
+
+
+rm_old_files2 $dir_trabalho $dir_backup $checking  
 
 for item in "$dir_trabalho"/*; do
 
