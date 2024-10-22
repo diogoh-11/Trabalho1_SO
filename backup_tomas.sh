@@ -53,9 +53,11 @@ fi
     
 #rm_old_files $dir_trabalho $dir_backup $checking $dont_update $tfile $regexpr           # remove os ficheiros que já não estou no dir_trabalho da backup
 
-echo "---------------Current dir: $dir_trabalho-------------------------"
-
-for item in "$dir_trabalho"/*; do
+for item in "$dir_trabalho"/{.,}*; do
+    # Skip the "." and ".." directories
+    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" ]]; then 
+        continue
+    fi
 
     if [ -f "$item" ]; then 
         file="$item"
@@ -100,13 +102,31 @@ for item in "$dir_trabalho"/*; do
             echo -e "\n>> Ficheiro \"$file\" não será atualizado por input utilizador!"  
         fi
     else   # se for diretorio chamar script recursivamente sobre esse diretorio
-        subdir_name="${item##*/}"
-        echo "Nome subdir name: $subdir_name"
-        echo "mkdir $dir_backup/$subdir_name"
+        dir="$item"
+        subdir_name="${dir##*/}"
         mkdir $dir_backup/$subdir_name
         echo "Novo dir_trabalho: $dir_trabalho/$subdir_name"
         echo "Novo dir_backup: $dir_backup/$subdir_name"
         $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+        # if [[ "$dir" =~ $regexpr ]]; then 
+            
+        #     if [ -e "$dir_backup/$subdir_name" ]; then        # verifica se existe no diretório de backup um diretorio com o mesmo nome
+        #         backed_dir=$dir_backup/$fname
+        #         $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+
+        #     else                                        # não existe no dir de backup um ficherio com o mesmo nome
+        
+        #         if $checking; then
+        #             echo "cp -a $file $dir_backup"     # printa os comandos estando no modo checking
+        
+        #         else
+        #             cp -a "$file" "$dir_backup"          # executa os comandos não estando no modo checking
+        #             echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
+        #         fi
+        #     fi  
+        # else 
+        #     echo -e "\n>> Ficheiro \"$file\" não será atualizado por input utilizador!"  
+        # fi
         
     fi
 done
