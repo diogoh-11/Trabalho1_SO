@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./rm_old_files.sh
+. ./rm_old_files2.sh
 . ./in_array.sh
 
 checking=false 
