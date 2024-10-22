@@ -8,12 +8,19 @@ rm_old_files2(){
     dir_backup="$2"
     checking="$3"
 
+    shopt -s dotglob
+
     if ! [ -z "$( ls -A $dir_backup )" ]; then             # garante q o dir n está vazio
 
-        for item in "$dir_backup"/{*,.*}; do
+        for item in "$dir_backup"/*; do
+
+            if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/*" ]]; then 
+                continue
+            fi
 
             if [ -f "$item" ]; then
-                fname="${item##*/}"
+                file="$item"
+                fname="${file##*/}"
 
                 if ! [ -e "$dir_trabalho/$fname" ]; then        # verifica se o ficherio ainda existe no dir de trabalho
                     
@@ -21,23 +28,27 @@ rm_old_files2(){
                         echo "rm $dir_backup/$fname"           # printa os comandos estando no modo checking
                     else
                         rm "$dir_backup/$fname"              # executa os comandos não estando no modo checking
-                        echo -e "\n>> Removed no longer existing file \"$fname\" from \"$dir_backup\"."
+                        echo -e "\n>> Removed no longer existing file \"$file\" from \"$dir_backup\"."
                     fi
                 fi
 
             elif [ -d "$item" ]; then
-                fname="${item##*/}"
+                dir=$item
+                dir_name="${dir##*/}"
 
-                if ! [ -e "$dir_trabalho/$fname/" ]; then        # verifica se o diretorio ainda existe no dir de trabalho
+                if ! [ -e "$dir_trabalho/$dir_name" ]; then        # verifica se o diretorio ainda existe no dir de trabalho
                     
                     if $checking; then
-                        echo "rm -r $dir_backup/$fname"           # printa os comandos estando no modo checking
+                        echo "rmdir $dir"           # printa os comandos estando no modo checking
                     else
-                        rm -r "$dir_backup/$fname"              # executa os comandos não estando no modo checking
-                        echo -e "\n>> Removed no longer existing file \"$fname\" from \"$dir_backup\"."
+                        rm -r "$dir"              # executa os comandos não estando no modo checking
+                        echo -e "\n>> Removed no longer existing directory \"$dir_name\" from \"$dir_backup\"."
                     fi
                 fi
             fi
         done
+
+
     fi
+    shopt -u dotglob
 }

@@ -39,10 +39,7 @@ shift $((OPTIND - 1))                                       # remove os argument
 dir_trabalho="$1"
 dir_backup="$2"
 
-for ((i = 0; i < ${#dont_update[@]}; i++)); do              # debug
-    echo "$i: ${dont_update[i]}"
-done
-
+shopt -s dotglob
 
 if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     echo ">> INVALID ARGUMENTS!!!"
@@ -50,12 +47,12 @@ if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     exit 1
 fi
 
-    
-#rm_old_files $dir_trabalho $dir_backup $checking $dont_update $tfile $regexpr           # remove os ficheiros que já não estou no dir_trabalho da backup
+rm_old_files2 $dir_trabalho $dir_backup $checking            # remove os ficheiros que já não estou no dir_trabalho da backup
 
-for item in "$dir_trabalho"/{.,}*; do
+
+for item in "$dir_trabalho"/*; do
     # Skip the "." and ".." directories
-    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" ]]; then 
+    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/*" ]]; then 
         continue
     fi
 
@@ -99,37 +96,39 @@ for item in "$dir_trabalho"/{.,}*; do
                 fi
             fi  
         else 
-            echo -e "\n>> Ficheiro \"$file\" não será atualizado por input utilizador!"  
+            echo -e "\n>> Ficheiro \"$file\" não será copiado/atualizado por input utilizador!"  
         fi
+
     else   # se for diretorio chamar script recursivamente sobre esse diretorio
         dir="$item"
         subdir_name="${dir##*/}"
-        mkdir $dir_backup/$subdir_name
-        echo "Novo dir_trabalho: $dir_trabalho/$subdir_name"
-        echo "Novo dir_backup: $dir_backup/$subdir_name"
-        $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
-        # if [[ "$dir" =~ $regexpr ]]; then 
             
-        #     if [ -e "$dir_backup/$subdir_name" ]; then        # verifica se existe no diretório de backup um diretorio com o mesmo nome
-        #         backed_dir=$dir_backup/$fname
-        #         $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+        if [ -e "$dir_backup/$subdir_name" ]; then        # verifica se existe no diretório de backup um diretorio com o mesmo nome
+            backed_dir=$dir_backup/$fname
+            
+            if $checking; then
+                echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
+            
+            else
+                $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+            fi
+        
+        else                                       
+            if $checking; then
+                echo "mkdir $dir_backup/$subdir_name"
+                echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
 
-        #     else                                        # não existe no dir de backup um ficherio com o mesmo nome
-        
-        #         if $checking; then
-        #             echo "cp -a $file $dir_backup"     # printa os comandos estando no modo checking
-        
-        #         else
-        #             cp -a "$file" "$dir_backup"          # executa os comandos não estando no modo checking
-        #             echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
-        #         fi
-        #     fi  
-        # else 
-        #     echo -e "\n>> Ficheiro \"$file\" não será atualizado por input utilizador!"  
-        # fi
-        
+            else
+                mkdir $dir_backup/$subdir_name
+                echo -e "\n>> Created directory \"$dir_backup/$subdir_name\" in \"$dir_backup\""
+                $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+            fi
+        fi   
     fi
+        
 done
+
+shopt -u dotglob
 
 
 
