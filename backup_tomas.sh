@@ -6,7 +6,6 @@ checking=false
 tfile="no_tfile"
 regexpr="\w+"        # expressao regular q aceita todos os nomes de ficheiros ou seja a n ser q seja dada como input uma outra expressao regular todos os ficheiros vão ser transferidos     
 declare -a dont_update  # Standard indexed array
-sub_directoryies=()
 
 while getopts "cb:r:" option; do                           # itera sobre as opções passadas na linha de comandos e armazena em option 
     case $option in
@@ -44,6 +43,7 @@ for ((i = 0; i < ${#dont_update[@]}; i++)); do              # debug
     echo "$i: ${dont_update[i]}"
 done
 
+
 if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     echo ">> INVALID ARGUMENTS!!!"
     echo ">> Usage: $0 [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup"
@@ -53,7 +53,9 @@ fi
     
 #rm_old_files $dir_trabalho $dir_backup $checking $dont_update $tfile $regexpr           # remove os ficheiros que já não estou no dir_trabalho da backup
 
-for item in "$dir_trabalho"/{*,.*}; do
+echo "---------------Current dir: $dir_trabalho-------------------------"
+
+for item in "$dir_trabalho"/*; do
 
     if [ -f "$item" ]; then 
         file="$item"
@@ -95,24 +97,19 @@ for item in "$dir_trabalho"/{*,.*}; do
                 fi
             fi  
         else 
-            continue
-            #echo -e "\n>> Ficheiro \"$file\" não será atualizado por input utilizador!"  
+            echo -e "\n>> Ficheiro \"$file\" não será atualizado por input utilizador!"  
         fi
     else   # se for diretorio chamar script recursivamente sobre esse diretorio
-        sub_dir=$item
-        echo "-------------------------------------$sub_dir"
-        sub_directories+=("$sub_dir")
-        continue
+        subdir_name="${item##*/}"
+        echo "Nome subdir name: $subdir_name"
+        echo "mkdir $dir_backup/$subdir_name"
+        mkdir $dir_backup/$subdir_name
+        echo "Novo dir_trabalho: $dir_trabalho/$subdir_name"
+        echo "Novo dir_backup: $dir_backup/$subdir_name"
+        $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+        
     fi
 done
 
-for subdir in "${sub_directories[@]}"; do
-    subdir_name="${subdir##*/}"
-    echo "$subdir_name"
-    echo "created subdir $dir_backup/$subdir_name"
-    mkdir "$dir_backup/$subdir_name"
-    echo "entered subdir $dir_backup/$subdir_name"
-    $0 -c -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
 
-done
 
