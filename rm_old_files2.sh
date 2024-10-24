@@ -8,13 +8,11 @@ rm_old_files2(){
     dir_backup="$2"
     checking="$3"
 
-    shopt -s dotglob
-
     if ! [ -z "$( ls -A $dir_backup )" ]; then             # garante q o dir n está vazio
 
-        for item in "$dir_backup"/*; do
+        for item in "$dir_backup"/{*,.*}; do
 
-            if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/*" ]]; then 
+            if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" ]]; then 
                 continue
             fi
 
@@ -42,7 +40,7 @@ rm_old_files2(){
                         echo "rmdir $dir"           # printa os comandos estando no modo checking
                     else
                         rm -r "$dir"              # executa os comandos não estando no modo checking
-                        echo -e "\n>> Removed no longer existing directory \"$dir_name\" from \"$dir_backup\"."
+                        echo -e "\n>> Removed no longer existing directory \"$dir\" from \"$dir_backup\"."
                     fi
                 fi
             fi
@@ -50,5 +48,4 @@ rm_old_files2(){
 
 
     fi
-    shopt -u dotglob
 }

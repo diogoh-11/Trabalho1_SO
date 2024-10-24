@@ -11,3 +11,33 @@ https://www.masteringunixshell.net/qa40/bash-how-to-pass-array-to-function.html
 # Desativa a opção para pegar arquivos e pastas ocultas
         shopt -u dotglob
 
+touch 1
+touch 2
+touch 3
+touch 4
+touch 5
+touch 6
+touch 7
+mkdir d1
+mkdir d2
+cd d1
+touch a
+touch b
+touch c
+cd ..
+cd d2
+mkdir d21
+touch d
+touch e
+touch f
+cd d21
+touch 11
+touch 12
+touch 13
+mkdir k
+cd k
+touch k1
+touch k2
+touch k3
+cd ..
+touch .hiddenf
