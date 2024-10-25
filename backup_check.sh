@@ -22,7 +22,7 @@ checkrec(){
                     difere="true"
                 fi
             else
-                echo ""$item2" not in "$dir_trabalho""
+                echo ""$item1" not in "$dir_backup""
                 difere="true"
             fi
 
@@ -32,7 +32,7 @@ checkrec(){
             if [ -d "$item2" ];then
                 checkrec "$item1" "$item2"
             else
-                echo "$item2 not in "$dir_trabalho""
+                echo ""$item1" not in "$dir_backup""
                 difere="true"
             fi
         fi
