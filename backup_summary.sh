@@ -3,7 +3,7 @@
 . ./in_array.sh
 
 checking=false 
-tfile=" "                                # valor default para nome do ficheiro para que seja criada uma array vazia no caso de n ter sido dado input tfile
+tfile=" "                               # valor default para nome do ficheiro para que seja criada uma array vazia no caso de n ter sido dado input tfile
 regexpr="\w+"                           # expressao regular que aceita todos os nomes de ficheiros, garantindo que se não for dada uma expressão regular, todos os ficheiros são atualizados     
 declare -a dont_update                  # declarar array vazia que servirá para armazenar nomes de ficheiros a não atualizar no caso de ser passado algum pelo input tfile
 
@@ -38,24 +38,36 @@ shift $((OPTIND - 1))               # remove os argumentos iterados no loop ante
 dir_trabalho="$1"                   # diretório de trabalho passado
 dir_backup="$2"                     # diretório de backup passado
 
+errors=0
+warnings=0
+updated=0
+copied=0
+untouched=0
+bytes_copied=0
+bytes_deleted=0
+bytes_untouched=0
+
 if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     echo ">> INVALID ARGUMENTS!!!"                                              # fazer validação dos argumentos passados
     echo ">> Usage: $0 [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup"
+    ((errors+=1))
     exit 1
 fi
 
 rm_old_files2 $dir_trabalho $dir_backup $checking            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
+deleted=$?
 
 
 for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos os itens do diretório de trabalho, incluido os ficheiros escondidos
 
-    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" ]]; then       # ignorar ".", ".." e ".*"
+    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" || "$item" == "$dir_trabalho/*" ]]; then       # ignorar ".", ".." e ".*"
         continue
     fi
 
     if [ -f "$item" ]; then                                             # caso item seja um ficheiro
         file="$item"
         fname="${file##*/}"                                             # tirar nome do ficheiro
+        file_size=$(wc -c < "$file") 
         in_array "$file" "${dont_update[@]}"                            # verificar se esse ficherio consta na list de ficherios a não atualizar
         ret_val=$?                                                      # valor de retorno da função (1: está no array; 0: não está no array)
         
@@ -72,16 +84,22 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                     
                     else
                         rm "$backed_file"                                                           # remove ficheiro antigo
+                        ((bytes_deleted+=file_size))
                         cp -a "$file" "$dir_backup"                                                 # copia ficheiro mais recente
+                        ((bytes_copied+=file_size))
                         echo -e "\n>> Removed older version of \"$file\" from \"$dir_backup\"."
                         echo -e ">> Copyed \"$file\" to \"$dir_backup\"."
+                        ((updated+=1))
                     fi
                 
                 elif [[ "$backed_file" -nt "$file" ]]; then               # ve se o ficheiro no diretório de backup é mais recente que o ficheiro com o mesmo nome no diretório de trabalho
+                    ((warnings+=1))
                     echo -e "\n>> WARNING: backup entry \"$backed_file\" is newer than \"$file\"... [Should not happen!!!]"
                 
                 else    
                     if ! $checking; then
+                        ((untouched+=1))
+                        ((bytes_untouched+=file_size))
                         echo -e "\n>> File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro porque data de modificação é a mesma ou ficheiro no diretório de backup está mais atualizado
                     fi
                 fi
@@ -93,6 +111,8 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         
                 else
                     cp -a "$file" "$dir_backup"                                     # executa os comandos não estando no modo checking
+                    ((bytes_copied+=file_size))
+                    ((copied+=1))
                     echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
                 fi
             fi  
@@ -125,10 +145,13 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                 echo -e "\n>> Created directory \"$dir_backup/$subdir_name\" in \"$dir_backup\""
                 $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
             fi
-        fi   
+        fi  
     fi
         
 done
+
+echo -e "\n>> While backuping $dir_trabalho: $errors Errors; $warnings Warnings; $updated Updated; $copied Copied ($bytes_copied B); $untouched Untouched ($bytes_untouched B); $deleted Deleted ($bytes_deleted B)"
+
 
 
 

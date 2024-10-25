@@ -7,6 +7,7 @@ rm_old_files2(){
     dir_trabalho="$1"
     dir_backup="$2"
     checking="$3"
+    num_deleted_files=0;
 
     if ! [ -z "$( ls -A $dir_backup )" ]; then             # garante q o dir n está vazio
 
@@ -26,6 +27,7 @@ rm_old_files2(){
                         echo "rm $dir_backup/$fname"           # printa os comandos estando no modo checking
                     else
                         rm "$dir_backup/$fname"              # executa os comandos não estando no modo checking
+                        ((num_deleted_files+=1))
                         echo -e "\n>> Removed no longer existing file \"$file\" from \"$dir_backup\"."
                     fi
                 fi
@@ -40,12 +42,13 @@ rm_old_files2(){
                         echo "rmdir $dir"           # printa os comandos estando no modo checking
                     else
                         rm -r "$dir"              # executa os comandos não estando no modo checking
+                        ((num_deleted_files+=1))
                         echo -e "\n>> Removed no longer existing directory \"$dir\" from \"$dir_backup\"."
                     fi
                 fi
             fi
         done
-
-
     fi
+
+    return $num_deleted_files   #se num de ficheiros eliminados for maior que 255 n retorno o valor desejado!
 }
