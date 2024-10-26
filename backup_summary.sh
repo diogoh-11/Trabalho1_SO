@@ -93,9 +93,11 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                     fi
                 
                 elif [[ "$backed_file" -nt "$file" ]]; then               # ve se o ficheiro no diretório de backup é mais recente que o ficheiro com o mesmo nome no diretório de trabalho
-                    ((warnings+=1))
-                    echo -e "\n>> WARNING: backup entry \"$backed_file\" is newer than \"$file\"... [Should not happen!!!]"
-                
+                    if ! $checking; then
+                        ((warnings+=1))
+                        echo -e "\n>> WARNING: backup entry \"$backed_file\" is newer than \"$file\"... [Should not happen!!!]"
+                    fi
+
                 else    
                     if ! $checking; then
                         ((untouched+=1))
@@ -117,7 +119,11 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                 fi
             fi  
         else 
-            echo -e "\n>> File \"$file\" will not be updated due to user input (tfile or regex)!"   # nome do ficherio conta na lista de ficherios a não alterar ou não aceita expressão regular passada
+            if ! $checking; then
+                ((untouched+=1))
+                ((bytes_untouched+=file_size))
+                echo -e "\n>> File \"$file\" will not be updated due to user input (tfile or regex)!"   # nome do ficherio conta na lista de ficherios a não alterar ou não aceita expressão regular passada
+            fi
         fi
 
     else                                                                    # caso em que "item" é um diretório  precisamos tratar de fazer backup desse diretório recorrendo à chamada recursiva do script nesse novo diretório de trabalho e backup
@@ -150,8 +156,9 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         
 done
 
-echo -e "\n>> While backuping $dir_trabalho: $errors Errors; $warnings Warnings; $updated Updated; $copied Copied ($bytes_copied B); $untouched Untouched ($bytes_untouched B); $deleted Deleted ($bytes_deleted B)"
-
+if ! $checking; then
+    echo -e "\n>> While backuping $dir_trabalho: $errors Errors; $warnings Warnings; $updated Updated; $copied Copied ($bytes_copied B); $untouched Untouched ($bytes_untouched B); $deleted Deleted ($bytes_deleted B)"
+fi
 
 
 
