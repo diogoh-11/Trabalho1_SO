@@ -27,27 +27,27 @@ if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
 fi
 
 if [ -z "$( ls -A $dir_trabalho )" ]; then 
-    echo "No files in $dir_trabalho!"           # verificar se para a execução do script completamente ou se "salta" esse diretótio vazio
+    echo "No files in $dir_trabalho!"                       # verificar se diretótio está vazio
     exit 0
 fi
 
-rm_old_files $dir_trabalho $dir_backup $checking            # remove os ficheiros que já não estou no dir_trabalho da backup
+rm_old_files $dir_trabalho $dir_backup $checking            # remove os ficheiros que já não estao no dir_trabalho da backup
 
 for file in "$dir_trabalho"/{*,.*}; do
 
     fname="${file##*/}"
 
-    if [ -e "$dir_backup/$fname" ]; then        # verifica se existe no diretório de backup um ficheiro com o mesmo nome
+    if [ -e "$dir_backup/$fname" ]; then                    # verifica se existe no diretório de backup um ficheiro com o mesmo nome
         backed_file=$dir_backup/$fname
 
-        if [[ "$file" -nt "$backed_file" ]]; then    # ve se o ficheiro no dir trabalho é mais recente que o ficherio com o mesmo nome no dir de backup
+        if [[ "$file" -nt "$backed_file" ]]; then           # ve se o ficheiro no dir trabalho é mais recente que o ficherio com o mesmo nome no dir de backup
             
             if $checking; then
-                echo "rm $backed_file"          # printa os comandos estando no modo checking
+                echo "rm $backed_file"                      # printa os comandos estando no modo checking
                 echo "cp -a $file $dir_backup"
             
             else
-                rm "$backed_file"               # executa os comandos não estando no modo checking
+                rm "$backed_file"                           # executa os comandos não estando no modo checking
                 cp -a "$file" "$dir_backup"
                 echo -e "\n>> Removed older version of \"$file\" from \"$dir_backup\"."
                 echo -e ">> Copyed \"$file\" to \"$dir_backup\"."
@@ -59,13 +59,13 @@ for file in "$dir_trabalho"/{*,.*}; do
             fi
         fi
 
-    else                                        # não existe no dir de backup um ficherio com o mesmo nome
+    else                                                                    # não existe no dir de backup um ficherio com o mesmo nome
         
         if $checking; then
-            echo "cp -a $file $dir_backup"     # printa os comandos estando no modo checking
+            echo "cp -a $file $dir_backup"                                  # printa os comandos estando no modo checking
         
         else
-            cp -a "$file" "$dir_backup"          # executa os comandos não estando no modo checking
+            cp -a "$file" "$dir_backup"                                     # executa os comandos não estando no modo checking
             echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
         fi
     fi

@@ -4,21 +4,31 @@
 # $2 = dir backup
 
 rm_old_files2(){
+
     dir_trabalho="$1"
     dir_backup="$2"
     checking="$3"
-    num_deleted_files=0;
+    write_to_file=false
+    
+    if [ $# -eq 4 ]; then
+        temp_file="$4"                          # caso em que funcao recebe nome de ficheiro temporario para poder devolver ambos os valores
+        write_to_file=true
+    fi
+    
+    num_deleted_files=0
+    bytes_deleted=0
 
     if ! [ -z "$( ls -A $dir_backup )" ]; then             # garante q o dir n está vazio
 
         for item in "$dir_backup"/{*,.*}; do
 
-            if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" ]]; then 
+            if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" || "$item" == "$dir_trabalho/*" ]]; then       # ignorar ".", ".." e ".*"
                 continue
             fi
 
             if [ -f "$item" ]; then
                 file="$item"
+                file_size=$(wc -c < "$file") 
                 fname="${file##*/}"
 
                 if ! [ -e "$dir_trabalho/$fname" ]; then        # verifica se o ficherio ainda existe no dir de trabalho
@@ -28,6 +38,7 @@ rm_old_files2(){
                     else
                         rm "$dir_backup/$fname"              # executa os comandos não estando no modo checking
                         ((num_deleted_files+=1))
+                        ((bytes_deleted+=file_size))
                         echo -e "\n>> Removed no longer existing file \"$file\" from \"$dir_backup\"."
                     fi
                 fi
@@ -42,7 +53,6 @@ rm_old_files2(){
                         echo "rmdir $dir"           # printa os comandos estando no modo checking
                     else
                         rm -r "$dir"              # executa os comandos não estando no modo checking
-                        ((num_deleted_files+=1))
                         echo -e "\n>> Removed no longer existing directory \"$dir\" from \"$dir_backup\"."
                     fi
                 fi
@@ -50,5 +60,7 @@ rm_old_files2(){
         done
     fi
 
-    return $num_deleted_files   #se num de ficheiros eliminados for maior que 255 n retorno o valor desejado!
+    if $write_to_file; then
+        echo "$num_deleted_files" "$bytes_deleted" > "$temp_file"       # escrever valores em ficheiro temporário para serem lidos no script
+    fi
 }

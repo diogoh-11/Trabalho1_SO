@@ -6,6 +6,15 @@ checking=false
 tfile=" "                               # valor default para nome do ficheiro para que seja criada uma array vazia no caso de n ter sido dado input tfile
 regexpr="\w+"                           # expressao regular que aceita todos os nomes de ficheiros, garantindo que se não for dada uma expressão regular, todos os ficheiros são atualizados     
 declare -a dont_update                  # declarar array vazia que servirá para armazenar nomes de ficheiros a não atualizar no caso de ser passado algum pelo input tfile
+errors=0
+warnings=0
+updated=0
+copied=0
+deleted=0
+untouched=0
+bytes_copied=0
+bytes_deleted=0
+bytes_untouched=0
 
 while getopts "cb:r:" option; do        # itera sobre as opções passadas na linha de comandos e armazena em option 
     case $option in
@@ -21,6 +30,14 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                     dont_update[$index]="$line"                 # coloca no array "dont_update" o nome dos ficheiros que não serão atualizados no backup
                     index=$(($index+1))
                 done < "$tfile"
+            
+            elif [ "$tfile" == " " ]; then
+                continue
+            
+            else
+                echo -e "\n>> WARNING: tfile \"$tfile\" does not exist!"
+                ((warnings+=1))
+
             fi
             ;;
         r)  
@@ -38,14 +55,6 @@ shift $((OPTIND - 1))               # remove os argumentos iterados no loop ante
 dir_trabalho="$1"                   # diretório de trabalho passado
 dir_backup="$2"                     # diretório de backup passado
 
-errors=0
-warnings=0
-updated=0
-copied=0
-untouched=0
-bytes_copied=0
-bytes_deleted=0
-bytes_untouched=0
 
 if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     echo ">> INVALID ARGUMENTS!!!"                                              # fazer validação dos argumentos passados
@@ -54,9 +63,10 @@ if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     exit 1
 fi
 
-rm_old_files2 $dir_trabalho $dir_backup $checking            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
-deleted=$?
-
+temp_file=$(mktemp)                                                             # criar ficherio temporário para armazenar valores de retorno da função
+rm_old_files2 "$dir_trabalho" "$dir_backup" "$checking" "$temp_file"            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
+read deleted bytes_deleted < "$temp_file"                                       # ler valores retornados pela função
+rm "$temp_file"                                                                 # remover ficheiro temporário
 
 for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos os itens do diretório de trabalho, incluido os ficheiros escondidos
 
@@ -102,7 +112,7 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                     if ! $checking; then
                         ((untouched+=1))
                         ((bytes_untouched+=file_size))
-                        echo -e "\n>> File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro porque data de modificação é a mesma ou ficheiro no diretório de backup está mais atualizado
+                        echo -e "\n>> File \"$file\" doesn't need backuping!"      # imprimir que n foi feita alteração ao ficheiro porque data de modificação é a mesma ou ficheiro no diretório de backup está mais atualizado
                     fi
                 fi
 

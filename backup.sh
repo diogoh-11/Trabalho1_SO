@@ -44,12 +44,12 @@ if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
     exit 1
 fi
 
-rm_old_files2 $dir_trabalho $dir_backup $checking            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
+rm_old_files2 "$dir_trabalho" "$dir_backup" "$checking"            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
 
 
 for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos os itens do diretório de trabalho, incluido os ficheiros escondidos
 
-    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" ]]; then       # ignorar ".", ".." e ".*"
+    if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" || "$item" == "$dir_trabalho/*" ]]; then       # ignorar ".", ".." e ".*"
         continue
     fi
 
