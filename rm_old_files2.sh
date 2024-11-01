@@ -34,13 +34,12 @@ rm_old_files2(){
                 if ! [ -e "$dir_trabalho/$fname" ]; then        # verifica se o ficherio ainda existe no dir de trabalho
                     
                     if $checking; then
-                        echo "rm $dir_backup/$fname"           # printa os comandos estando no modo checking
+                        echo "rm $dir_backup/$fname"            # printa os comandos estando no modo checking
                     else
                         file_size=$(wc -c < "$file")
-                        rm "$dir_backup/$fname"              # executa os comandos não estando no modo checking
+                        rm "$dir_backup/$fname"                 # executa os comandos não estando no modo checking
                         ((bytes_deleted+=file_size))
                         ((num_deleted_files+=1))
-                        ((bytes_deleted+=file_size))
                         echo -e "\n>> Removed no longer existing file \"$file\" from \"$dir_backup\"."
                     fi
                 fi
@@ -52,14 +51,14 @@ rm_old_files2(){
                 if ! [ -e "$dir_trabalho/$dir_name" ]; then        # verifica se o diretorio ainda existe no dir de trabalho
                     
                     if $checking; then
-                        echo "rmdir $dir"           # printa os comandos estando no modo checking
+                        echo "rmdir $dir"                           # printa os comandos estando no modo checking
                     else
                         dir_size=$(du -sb "$dir" | cut -f1)
-                        file_count=$(find "$dir" -type f | wc -l)  # Conta o número de arquivos dentro do diretório
-                        ((bytes_deleted+=dir_size))  # Soma o tamanho do diretório aos bytes deletados
+                        file_count=$(find "$dir" -type f | wc -l)   # Conta o número de arquivos dentro do diretório
+                        ((bytes_deleted+=dir_size))                 # Soma o tamanho do diretório aos bytes deletados
                         ((num_deleted_files+=file_count))
 
-                        rm -r "$dir"              # executa os comandos não estando no modo checking
+                        rm -r "$dir"                                # executa os comandos não estando no modo checking
                         echo -e "\n>> Removed no longer existing directory \"$dir\" from \"$dir_backup\"."
                     fi
                 fi
