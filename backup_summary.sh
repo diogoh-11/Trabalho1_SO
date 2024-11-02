@@ -27,7 +27,7 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                 index=0
 
                 while read -r line; do 
-                    dont_update[$index]="$line"                 # coloca no array "dont_update" o nome dos ficheiros que não serão atualizados no backup
+                    dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
                     index=$(($index+1))
                 done < "$tfile"
             
@@ -35,7 +35,7 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                 continue
             
             else
-                echo -e "\n>> WARNING: tfile \"$tfile\" does not exist!"
+                echo -e "\n>> WARNING: tfile \"$tfile\" does not exist!"        # imprimir warning caso tfile n exiista
                 ((warnings+=1))
 
             fi
@@ -55,20 +55,25 @@ shift $((OPTIND - 1))               # remove os argumentos iterados no loop ante
 dir_trabalho="$1"                   # diretório de trabalho passado
 dir_backup="$2"                     # diretório de backup passado
 
-
-if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ] || ! [ -d "$dir_backup" ]; then
-    echo ">> INVALID ARGUMENTS!!!"                                              # fazer validação dos argumentos passados
-    echo ">> Usage: $0 [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup"
+if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ]; then
+    echo ">> INVALID ARGUMENTS!!!"                                                                  # validação dos argumentos
+    echo ">> Usage: $0 [-c] dir_trabalho dir_backup"
     ((errors+=1))
     exit 1
+
+elif  ! [ -e "$dir_backup" ] || ! [ -d "$dir_backup" ]; then
+    echo -e "\n>> WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."         # criar diretorio de backup se o mesmo não existir
+    ((warnings+=1))
+    mkdir "$dir_backup"
 fi
+
 
 temp_file=$(mktemp)                                                             # criar ficherio temporário para armazenar valores de retorno da função
 rm_old_files2 "$dir_trabalho" "$dir_backup" "$checking" "$temp_file"            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
 read deleted bytes_deleted < "$temp_file"                                       # ler valores retornados pela função
 rm "$temp_file"                                                                 # remover ficheiro temporário
 
-for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos os itens do diretório de trabalho, incluido os ficheiros escondidos
+for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos os itens do diretório de trabalho, incluido os ficheiros e diretorios escondidos
 
     if [[ "$item" == "$dir_trabalho/." || "$item" == "$dir_trabalho/.." || "$item" == "$dir_trabalho/.*" || "$item" == "$dir_trabalho/*" ]]; then       # ignorar ".", ".." e ".*"
         continue
@@ -78,9 +83,10 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         file="$item"
         fname="${file##*/}"                                             # tirar nome do ficheiro
         file_size=$(wc -c < "$file") 
-        in_array "$file" "${dont_update[@]}"                            # verificar se esse ficherio consta na list de ficherios a não atualizar
+        absolute_path=$(realpath "$file")                               # obter path absoluto do ficherio para poder verficar se consta na array "dont_update"
+        in_array "$absolute_path" "${dont_update[@]}"                   # verificar se esse ficherio consta na list de ficherios a não atualizar        ret_val=$?                                                      # valor de retorno da função (1: está no array; 0: não está no array)
         ret_val=$?                                                      # valor de retorno da função (1: está no array; 0: não está no array)
-        
+
         if [ "$ret_val" -eq 0 ] && [[ "$file" =~ $regexpr ]]; then      # garantir que ficherio n está no array e valida a expressão regular que não sendo passada nenhuma será "\w+" e aceitará qq ficheiro
             
             if [ -e "$dir_backup/$fname" ]; then                        # verifica se existe no diretório de backup um ficheiro com o mesmo nome
@@ -97,8 +103,7 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                         ((bytes_deleted+=file_size))
                         cp -a "$file" "$dir_backup"                                                 # copia ficheiro mais recente
                         ((bytes_copied+=file_size))
-                        echo -e "\n>> Removed older version of \"$file\" from \"$dir_backup\"."
-                        echo -e ">> Copyed \"$file\" to \"$dir_backup\"."
+                        echo -e "\n>> File \"$file\" was successfully updated!"
                         ((updated+=1))
                     fi
                 

@@ -5,3 +5,5 @@ teste4.txt
 teste5.txt
 teste6.txt
 ../src/2
+../src/dir1/file3.txt
+/home/tsh19/Desktop/SO/P/src/dir1/subdir2/file7.txt
