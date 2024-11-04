@@ -51,7 +51,7 @@ rm_old_files2(){
                 if ! [ -e "$dir_trabalho/$dir_name" ]; then        # verifica se o diretorio ainda existe no dir de trabalho
                     
                     if $checking; then
-                        echo "rmdir $dir"                           # printa os comandos estando no modo checking
+                        echo "rm -r $dir"                           # printa os comandos estando no modo checking
                     else
                         dir_size=$(du -sb "$dir" | cut -f1)
                         file_count=$(find "$dir" -type f | wc -l)   # Conta o número de arquivos dentro do diretório
