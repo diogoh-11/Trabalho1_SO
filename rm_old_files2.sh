@@ -53,7 +53,7 @@ rm_old_files2(){
                     if $checking; then
                         echo "rm -r $dir"                           # printa os comandos estando no modo checking
                     else
-                        dir_size=$(du -sb "$dir" | cut -f1)
+                        dir_size=$(du -sb "$dir" | cut -f1)         # du retorna o nº de bytes e o nome do dir, então usamos o cut para extrair desse resultado apenas o valore de bytes
                         file_count=$(find "$dir" -type f | wc -l)   # Conta o número de arquivos dentro do diretório
                         ((bytes_deleted+=dir_size))                 # Soma o tamanho do diretório aos bytes deletados
                         ((num_deleted_files+=file_count))
