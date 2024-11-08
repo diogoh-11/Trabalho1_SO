@@ -27,7 +27,6 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                                                                             # imprimir warning caso tfile n exiista
             else
                 echo -e "\n>> WARNING: tfile \"$tfile\" does not exist!"
-                ((warnings+=1))
 
             fi
             ;;
