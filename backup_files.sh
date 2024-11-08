@@ -57,7 +57,8 @@ for file in "$dir_trabalho"/{*,.*}; do
             else
                 rm "$backed_file"                           # executa os comandos não estando no modo checking
                 cp -a "$file" "$dir_backup"
-                echo -e "\n>> File \"$file\" was successfully updated!"            fi
+                echo -e "\n>> File \"$file\" was successfully updated!"            
+            fi
         
         elif [[ "$backed_file" -nt "$file" ]]; then               # ve se o ficheiro no diretório de backup é mais recente que o ficheiro com o mesmo nome no diretório de trabalho
             if ! $checking; then
