@@ -18,8 +18,10 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                 index=0
 
                 while read -r line; do 
-                    dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
-                    index=$(($index+1))
+                    if [ -e "$line" ]; then                                     # garantir que ficheiro/diretório existe para que se possa usar "realpath"
+                        dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
+                        index=$(($index+1))
+                    fi
                 done < "$tfile"
             
             elif [ "$tfile" == " " ]; then
@@ -143,7 +145,9 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                 fi
             fi 
         else 
-            echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+            if ! $checking; then
+                echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+            fi        
         fi
     fi
         

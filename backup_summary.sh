@@ -26,9 +26,11 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
             if [ -f "$tfile" ] && ! [ -z "$tfile" ]; then       # garante que é um ficheiro e não está vazio antes de iterar pelos ficheiros nele escrito e guardar na array
                 index=0
 
-                while read -r line; do 
-                    dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
-                    index=$(($index+1))
+                 while read -r line; do 
+                    if [ -e "$line" ]; then                                     # garantir que ficheiro/diretório existe para que se possa usar "realpath"
+                        dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
+                        index=$(($index+1))
+                    fi
                 done < "$tfile"
             
             elif [ "$tfile" == " " ]; then
@@ -173,7 +175,13 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                 fi
             fi  
         else 
-            echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+            if ! $checking; then
+                dir_size=$(du -sb "$dir" | cut -f1)                 # du retorna o nº de bytes e o nome do dir, então usamos o cut para extrair desse resultado apenas o valore de bytes
+                file_count=$(find "$dir" -type f | wc -l)           # Conta o número de arquivos dentro do diretório  
+                ((untouched+=file_count))
+                ((bytes_untouched+=dir_size))
+                echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+            fi
         fi
     fi
         
