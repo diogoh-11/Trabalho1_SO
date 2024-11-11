@@ -144,29 +144,37 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
     else                                                                    # caso em que "item" é um diretório  precisamos tratar de fazer backup desse diretório recorrendo à chamada recursiva do script nesse novo diretório de trabalho e backup
         dir="$item"     
         subdir_name="${dir##*/}"                                            # extrair nome do diretório
-            
-        if [ -e "$dir_backup/$subdir_name" ]; then                          # verifica se existe no diretório de backup um diretório com o mesmo nome
-            backed_dir=$dir_backup/$fname
-            
-            if $checking; then                                                                                  # imprimir comandos no modo checking. Imprimimos a forma como chamariamos o script porque não conseguimos por vezes chamar recursivamente o script com o "-c" pelo facto de os diretórios não existitem ainda
-                echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
-            
-            else    
-                echo -e "\n>> Entered directory \"$dir\". Starting backing up..."                               # chamar script sobre os novos diretórios
-                $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
-            fi
-        
-        else                                                                                                    # diretório não existe          
-            if $checking; then
-                echo "mkdir $dir_backup/$subdir_name"                                                           # imprimir comandos no modo checking. Imprimimos a forma como chamariamos o script porque não conseguimos por vezes chamar recursivamente o script com o "-c" pelo facto de os diretórios não existitem ainda
-                echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
+        absolute_path=$(realpath "$dir")                                    # obter path absoluto do dir para poder verficar se consta na array "dont_update"
+        in_array "$absolute_path" "${dont_update[@]}"                       # verificar se esse diretorio consta na lista de ficherios/diretorios a não atualizar
+        ret_val=$? 
 
-            else
-                mkdir "$dir_backup/$subdir_name"                                                                # criar diretório no diretório de backup e chamar script sobre esses novos diretórios
-                echo -e "\n>> Created directory \"$dir_backup/$subdir_name\" in \"$dir_backup\""
-                $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
-            fi
-        fi  
+        if [ "$ret_val" -eq 0 ]; then   
+
+            if [ -e "$dir_backup/$subdir_name" ]; then                          # verifica se existe no diretório de backup um diretório com o mesmo nome
+                backed_dir=$dir_backup/$fname
+                
+                if $checking; then                                                                                  # imprimir comandos no modo checking. Imprimimos a forma como chamariamos o script porque não conseguimos por vezes chamar recursivamente o script com o "-c" pelo facto de os diretórios não existitem ainda
+                    echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
+                
+                else    
+                    echo -e "\n>> Entered directory \"$dir\". Starting backing up..."                               # chamar script sobre os novos diretórios
+                    $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+                fi
+            
+            else                                                                                                    # diretório não existe          
+                if $checking; then
+                    echo "mkdir $dir_backup/$subdir_name"                                                           # imprimir comandos no modo checking. Imprimimos a forma como chamariamos o script porque não conseguimos por vezes chamar recursivamente o script com o "-c" pelo facto de os diretórios não existitem ainda
+                    echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
+
+                else
+                    mkdir "$dir_backup/$subdir_name"                                                                # criar diretório no diretório de backup e chamar script sobre esses novos diretórios
+                    echo -e "\n>> Created directory \"$dir_backup/$subdir_name\" in \"$dir_backup\""
+                    $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
+                fi
+            fi  
+        else 
+            echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+        fi
     fi
         
 done
