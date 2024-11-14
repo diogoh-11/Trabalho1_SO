@@ -4,7 +4,7 @@
 
 checking=false 
 tfile=" "                               # valor default para nome do ficheiro para que seja criada uma array vazia no caso de n ter sido dado input tfile
-regexpr="\w+"                           # expressao regular que aceita todos os nomes de ficheiros, garantindo que se não for dada uma expressão regular, todos os ficheiros são atualizados     
+regexpr='\w+'                           # expressao regular que aceita todos os nomes de ficheiros, garantindo que se não for dada uma expressão regular, todos os ficheiros são atualizados     
 declare -a dont_update                  # declarar array vazia que servirá para armazenar nomes de ficheiros a não atualizar no caso de ser passado algum pelo input tfile
 errors=0
 warnings=0
@@ -43,7 +43,7 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
             fi
             ;;
         r)  
-            regexpr="$OPTARG"                                   # guarda em regexpr a expressão regular passada
+            regexpr="$OPTARG"                                                       # guarda em regexpr a expressão regular passada
             ;;
 
         *)
