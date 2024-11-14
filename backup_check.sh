@@ -36,7 +36,7 @@ checkrec(){
                 checkrec "$item1" "$item2"
             
             else
-                echo -2 "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem caso diretoria na diretoria de backup não se encontre na diretoria de trabalho 
+                echo -e "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem caso diretoria na diretoria de backup não se encontre na diretoria de trabalho 
                 differ="true"                                               # Atribuir à variável "differ" o valor true, visto que a diretoria não existe na diretoria de trabalho   
             fi
         fi
@@ -50,6 +50,6 @@ checkrec(){
 checkrec "$dir_trabalho" "$dir_backup"  #Chamar a função para comparar o dir_backup com dir_trabalho
 
 if $igual; then
-    echo -e ">> Both directories are equal!!!"    # Diretorias de trabalho e backup são iguais
+    echo -e ">> All correspondent items in dir_backup are in dir_trabalho !!!"    # Diretorias de trabalho e backup são iguais
 fi
 
