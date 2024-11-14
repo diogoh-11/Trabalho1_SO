@@ -7,46 +7,49 @@ igual="true"
 checkrec(){
 
     local dir1="$1"
-    local dir2="$2"
-    local difere="false"
+    local dir2="$2"                                     # Definir variáveis locais
+    local differ="false"
     
 
-    for item1 in "$dir1"/{*,.*}; do
-        if [ -f "$item1" ];then
-            #Verifica se o item existe na diretoria de backup
-            item2="$dir2/$(basename "$item1")"
-            if [ -f "$item2" ];then
-                #Compara os checksums dos arquivos
-                if [ "$(md5sum "$item1" | awk '{ print $1 }')" != "$(md5sum "$item2" | awk '{ print $1 }')" ]; then
-                    echo ""$item1" "$item2" differ."
-                    difere="true"
+    for item2 in "$dir2"/{*,.*}; do
+        
+        if [ -f "$item2" ];then                         # Verifica se o item na diretoria de backup é um ficheiro existente
+            item1="$dir1/$(basename "$item2")"          # A partir do ficherio item2 da diretoria de backup, definimos item1 como o ficherio que deveria estar na diretoria de trabalho 
+            
+            if [ -f "$item1" ];then                     # Verifica se ficheiro item1 existe na dir1 (diretoria de trabalho)
+
+                if [ "$(md5sum "$item2" | awk '{ print $1 }')" != "$(md5sum "$item1" | awk '{ print $1 }')" ]; then         # usar o comando md5sum com auxilio de awk para retirar apenas a informação relevante e verificar se os ficherios diferem
+                    echo -e "\n>> \""$item2"\" \""$item1"\" differ."                                                        # ficherio em diretoria de backup é diferente do que o ficherio na diretoria de trabalho
+                    differ="true"                                                                                           # atribuir à variável "differ" o valor true, visto que os ficheiros são diferentes
                 fi
-            else
-                echo ""$item1" not in "$dir_backup""
-                difere="true"
+            
+            else                                                            # Caso em que o ficheiro que está na diretoria de backup não existe na diretoria de trabalho
+                echo -e "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem relevante
+                differ="true"                                               # atribuir à variável "differ" o valor true, visto que o ficheiro não existe na diretoria de trabalho
             fi
 
-        elif [ -d "$item1" ]  ; then
-            #Chamar a função recursivamente se for diretorio
-            item2="$dir2/$(basename "$item1")"
-            if [ -d "$item2" ];then
+        elif [ -d "$item2" ]  ; then                                        # Caso em que o item do diretorio de backup é uma diretoria, será necessario chamar a função recurssivamente
+
+            item1="$dir1/$(basename "$item2")"                              # Suposto nome/path do diretorio que se deveria encontrar na diretoria de trabalho
+            
+            if [ -d "$item1" ];then                                         # Verificar se existe na forma de diretorio o item1 acima definido
                 checkrec "$item1" "$item2"
+            
             else
-                echo ""$item1" not in "$dir_backup""
-                difere="true"
+                echo -2 "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem caso diretoria na diretoria de backup não se encontre na diretoria de trabalho 
+                differ="true"                                               # Atribuir à variável "differ" o valor true, visto que a diretoria não existe na diretoria de trabalho   
             fi
         fi
     done
 
-    #Atualiza a variavel igual
-    if [ "$difere" == "true" ];then
-        igual="false"
+    if $differ;then
+        igual="false"                   # Atualizar variàvel que representa a igualdade dos diretorios
     fi
 }
-#Chama a função para comparar o dir_trabalho com backup
-checkrec "$dir_trabalho" "$dir_backup"
 
-if [ "$igual" = "true" ]; then
-    echo "As diretorias são iguais"
+checkrec "$dir_trabalho" "$dir_backup"  #Chamar a função para comparar o dir_backup com dir_trabalho
+
+if $igual; then
+    echo -e ">> Both directories are equal!!!"    # Diretorias de trabalho e backup são iguais
 fi
 
