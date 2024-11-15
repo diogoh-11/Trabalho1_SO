@@ -1,43 +1,44 @@
-# Trabalho1_SO
-https://medium.com/@wujido20/handling-flags-in-bash-scripts-4b06b4d0ed04
-https://linuxize.com/post/bash-functions/
-https://www.uptimia.com/questions/how-to-compare-file-dates-in-bash
-https://superuser.com/questions/352289/bash-scripting-test-for-empty-directory
-https://www.masteringunixshell.net/qa40/bash-how-to-pass-array-to-function.html
+# Ferramenta de criação/atualização de cópias de segurança em Bash
 
-# Ativa a opção para pegar arquivos e pastas ocultas
-        shopt -s dotglob
+Este projeto contém um conjunto de scripts Bash desenvolvidos para realizar operações de backup de diretórios e arquivos, com suporte a opções avançadas de exclusão, validação e relatório.
 
-# Desativa a opção para pegar arquivos e pastas ocultas
-        shopt -u dotglob
+---
 
-touch 1
-touch 2
-touch 3
-touch 4
-touch 5
-touch 6
-touch 7
-mkdir d1
-mkdir d2
-cd d1
-touch a
-touch b
-touch c
-cd ..
-cd d2
-mkdir d21
-touch d
-touch e
-touch f
-cd d21
-touch 11
-touch 12
-touch 13
-mkdir k
-cd k
-touch k1
-touch k2
-touch k3
-cd ..
-touch .hiddenf
+## Estrutura do Projeto
+
+### Scripts Incluídos
+
+#### `backup_files.sh`
+- Realiza o backup de arquivos em um diretório que não contém subdiretórios.
+- Atualiza apenas os arquivos cuja data de modificação seja posterior à do backup correspondente.
+- **Opção Suportada**:
+  - `-c`: Exibe os comandos que seriam executados, sem alterar o conteúdo da diretoria de backup.
+
+#### `backup.sh`
+- Expande o script anterior para suportar diretórios com subdiretórios e opções adicionais.
+- Pode ser executado recursivamente para processar subdiretórios.
+- **Opções Suportadas**:
+  - `-c`: Modo de simulação (exibe os comandos, mas não executa).
+  - `-b tfile`: Define um arquivo de texto contendo uma lista de arquivos/diretórios a serem excluídos do backup.
+  - `-r regexpr`: Copia apenas os arquivos que correspondem à expressão regular fornecida.
+
+#### `backup_summary.sh`
+- Expande o script `backup.sh` para incluir um sumário ao final de cada execução, mostrando:
+  - Número de erros.
+  - Warnings.
+  - Arquivos atualizados.
+  - Arquivos copiados.
+  - Arquivos apagados.
+
+#### `backup_check.sh`
+- Verifica se o conteúdo dos arquivos na diretoria de backup é idêntico ao dos arquivos correspondentes na diretoria de trabalho.
+- Usa o comando `md5sum` para comparar os conteúdos.
+- Não realiza cópias nem verifica novos arquivos.
+
+---
+
+## Estrutura de Comando
+
+### Uso Geral
+```bash
+./backup.sh [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup
