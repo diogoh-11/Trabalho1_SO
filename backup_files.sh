@@ -21,17 +21,17 @@ dir_trabalho="$1"
 dir_backup="$2"
 
 if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ]; then
-    echo ">> INVALID ARGUMENTS!!!"                                                                  # validação doa argumentos
-    echo ">> Usage: $0 [-c] dir_trabalho dir_backup"
+    echo "INVALID ARGUMENTS!!!"                                                                  # validação doa argumentos
+    echo "Usage: $0 [-c] dir_trabalho dir_backup"
     exit 1
 
 elif  ! [ -e "$dir_backup" ] || ! [ -d "$dir_backup" ]; then
-    echo -e "\n>> WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."         # caso não exista o diretorio de backup é criado um
+    echo -e "WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."         # caso não exista o diretorio de backup é criado um
     mkdir "$dir_backup"
 fi
 
 if [ -z "$( ls -A $dir_trabalho )" ]; then 
-    echo -e "\n>> WARNING: source directory \"$dir_trabalho\" is empty!"                       # verificar se diretótio está vazio
+    echo -e "WARNING: source directory \"$dir_trabalho\" is empty!"                       # verificar se diretótio está vazio
     exit 0
 fi
 
@@ -57,17 +57,19 @@ for file in "$dir_trabalho"/{*,.*}; do
             else
                 rm "$backed_file"                           # executa os comandos não estando no modo checking
                 cp -a "$file" "$dir_backup"
-                echo -e "\n>> File \"$file\" was successfully updated!"            
+                echo  "cp -a $file $backed_file"            
             fi
         
         elif [[ "$backed_file" -nt "$file" ]]; then               # ve se o ficheiro no diretório de backup é mais recente que o ficheiro com o mesmo nome no diretório de trabalho
             if ! $checking; then
-                echo -e "\n>> WARNING: backup entry \"$backed_file\" is newer than \"$file\"... [Should not happen!!!]"
+                echo -e "WARNING: backup entry $backed_file is newer than $file; Should not happen"
             fi
         
-        else    
+        
+        else   
             if ! $checking; then
-                echo -e "\n>> File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro
+                #echo -e "File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro
+                continue
             fi
         fi
 
@@ -78,7 +80,7 @@ for file in "$dir_trabalho"/{*,.*}; do
         
         else
             cp -a "$file" "$dir_backup"                                     # executa os comandos não estando no modo checking
-            echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
+            echo -e "cp -a $file $backed_file"
         fi
     fi
 

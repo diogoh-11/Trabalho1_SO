@@ -19,7 +19,7 @@ rm_old_files(){
                     echo "rm $dir_backup/$fname"           # printa os comandos estando no modo checking
                 else
                     rm "$dir_backup/$fname"              # executa os comandos não estando no modo checking
-                    echo -e "\n>> Removed no longer existing file \"$fname\" from \"$dir_backup\"."
+                    echo -e "Removed no longer existing file \"$fname\" from \"$dir_backup\"."
                 fi
             fi
 
