@@ -28,7 +28,7 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                 continue
                                                                             # imprimir warning caso tfile n exiista
             else
-                echo -e "\n>> WARNING: tfile \"$tfile\" does not exist!"
+                echo -e "WARNING: tfile \"$tfile\" does not exist!"
 
             fi
             ;;
@@ -49,11 +49,11 @@ dir_backup="$2"                     # diretório de backup passado
 
 if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ]; then
     echo ">> INVALID ARGUMENTS!!!"
-    echo ">> Usage: $0 [-c] dir_trabalho dir_backup"
+    echo "Usage: $0 [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup"
     exit 1
 
 elif  ! [ -e "$dir_backup" ] || ! [ -d "$dir_backup" ]; then
-    echo -e "\n>> WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."
+    echo -e "WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."
     mkdir "$dir_backup"
 fi
 
@@ -87,15 +87,17 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                     else
                         rm "$backed_file"                                                           # remove ficheiro antigo
                         cp -a "$file" "$dir_backup"                                                 # copia ficheiro mais recente
-                        echo -e "\n>> File \"$file\" was successfully updated!"
+                        #echo -e "\n>> File \"$file\" was successfully updated!"
+                        echo "cp -a $file $dir_backup/$fname"
                     fi
                 
                 elif [[ "$backed_file" -nt "$file" ]]; then               # ve se o ficheiro no diretório de backup é mais recente que o ficheiro com o mesmo nome no diretório de trabalho
-                    echo -e "\n>> WARNING: backup entry \"$backed_file\" is newer than \"$file\"... [Should not happen!!!]"
+                    echo -e "WARNING: backup entry \"$backed_file\" is newer than \"$dir_trabalho/$file\"... [Should not happen!!!]"
                 
                 else    
                     if ! $checking; then
-                        echo -e "\n>> File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro porque data de modificação é a mesma ou ficheiro no diretório de backup está mais atualizado
+                        #echo -e "\n>> File \"$file\" doesn't need backing up!"      # imprimir que n foi feita alteração ao ficheiro porque data de modificação é a mesma ou ficheiro no diretório de backup está mais atualizado
+                        continue
                     fi
                 fi
 
@@ -106,11 +108,13 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         
                 else
                     cp -a "$file" "$dir_backup"                                     # executa os comandos não estando no modo checking
-                    echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
+                    #echo -e "\n>> Copyed \"$file\" to \"$dir_backup\"."
+                    echo "cp -a $file $dir_backup/$fname"
                 fi
             fi  
         else 
-            echo -e "\n>> File \"$file\" will not be updated due to user input (tfile or regex)!"   # nome do ficherio conta na lista de ficherios a não alterar ou não aceita expressão regular passada
+            #echo -e "\n>> File \"$file\" will not be updated due to user input (tfile or regex)!"   # nome do ficherio conta na lista de ficherios a não alterar ou não aceita expressão regular passada
+            continue
         fi
 
     else                                                                    # caso em que "item" é um diretório  precisamos tratar de fazer backup desse diretório recorrendo à chamada recursiva do script nesse novo diretório de trabalho e backup
@@ -129,7 +133,7 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                     echo "$0 -c -b $tfile -r $regexpr $dir_trabalho/$subdir_name $dir_backup/$subdir_name"
                 
                 else    
-                    echo -e "\n>> Entered directory \"$dir\". Starting backing up..."                               # chamar script sobre os novos diretórios
+                    #echo -e "\n>> Entered directory \"$dir\". Starting backing up..."                               # chamar script sobre os novos diretórios
                     $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
                 fi
             
@@ -140,13 +144,15 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
 
                 else
                     mkdir "$dir_backup/$subdir_name"                                                                # criar diretório no diretório de backup e chamar script sobre esses novos diretórios
-                    echo -e "\n>> Created directory \"$dir_backup/$subdir_name\" in \"$dir_backup\""
+                    echo "mkdir $dir_backup/$subdir_name"
+                    #echo -e "\n>> Created directory \"$dir_backup/$subdir_name\" in \"$dir_backup\""
                     $0 -b "$tfile" -r "$regexpr" "$dir_trabalho/$subdir_name" "$dir_backup/$subdir_name"
                 fi
             fi 
         else 
             if ! $checking; then
-                echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+                #echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
+                continue
             fi        
         fi
     fi
