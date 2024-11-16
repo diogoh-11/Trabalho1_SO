@@ -19,12 +19,13 @@ checkrec(){
             if [ -f "$item1" ];then                     # Verifica se ficheiro item1 existe na dir1 (diretoria de trabalho)
 
                 if [ "$(md5sum "$item2" | awk '{ print $1 }')" != "$(md5sum "$item1" | awk '{ print $1 }')" ]; then         # usar o comando md5sum com auxilio de awk para retirar apenas a informação relevante e verificar se os ficherios diferem
-                    echo -e "\n>> \""$item2"\" \""$item1"\" differ."                                                        # ficherio em diretoria de backup é diferente do que o ficherio na diretoria de trabalho
+                    echo " $item1 $item2 differ."                                                        # ficherio em diretoria de backup é diferente do que o ficherio na diretoria de trabalho
+    
                     differ="true"                                                                                           # atribuir à variável "differ" o valor true, visto que os ficheiros são diferentes
                 fi
             
             else                                                            # Caso em que o ficheiro que está na diretoria de backup não existe na diretoria de trabalho
-                echo -e "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem relevante
+                #echo -e "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem relevante
                 differ="true"                                               # atribuir à variável "differ" o valor true, visto que o ficheiro não existe na diretoria de trabalho
             fi
 
@@ -36,7 +37,7 @@ checkrec(){
                 checkrec "$item1" "$item2"
             
             else
-                echo -e "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem caso diretoria na diretoria de backup não se encontre na diretoria de trabalho 
+                #echo -e "\n>> \""$item2"\" not in \""$dir_trabalho"\""      # Imprimir mensagem caso diretoria na diretoria de backup não se encontre na diretoria de trabalho 
                 differ="true"                                               # Atribuir à variável "differ" o valor true, visto que a diretoria não existe na diretoria de trabalho   
             fi
         fi
@@ -49,7 +50,8 @@ checkrec(){
 
 checkrec "$dir_trabalho" "$dir_backup"  #Chamar a função para comparar o dir_backup com dir_trabalho
 
-if $igual; then
-    echo -e ">> All correspondent items in dir_backup are in dir_trabalho !!!"    # Diretorias de trabalho e backup são iguais
-fi
+# De forma a ter outputs iguais
+#if $igual; then
+#    echo -e ">> All correspondent items in dir_backup are in dir_trabalho !!!"    # Diretorias de trabalho e backup são iguais
+#fi
 
