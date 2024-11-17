@@ -1,4 +1,3 @@
 error.py
 /home/tsh19/Desktop/SO/P/src/file1
 ../src/subdir1
-../src/file2.txt
