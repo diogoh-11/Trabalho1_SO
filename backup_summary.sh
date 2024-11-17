@@ -23,12 +23,12 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
             ;;
         b)
             tfile="$OPTARG"                                     # guarda em tfile o nome do ficheiro passado
-            
+
             if [ -f "$tfile" ] && ! [ -z "$tfile" ]; then       # garante que é um ficheiro e não está vazio antes de iterar pelos ficheiros nele escrito e guardar na array
                 index=0
 
                  while read -r line; do 
-                    if [ -e "$line" ] && [ -r "$file" ]; then                   # garantir que ficheiro/diretório existe e tem permissão de leitura para que se possa usar "realpath"
+                    if [ -e "$line" ] && [ -r "$line" ]; then                   # garantir que ficheiro/diretório existe e tem permissão de leitura para que se possa usar "realpath"
                         dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
                         index=$(($index+1))
                     fi
@@ -103,10 +103,6 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         continue
     fi
 
-    absolute_path=$(realpath "$item")                                   # obter path absoluto do ficherio/diretorio para poder verficar se consta na array "dont_update"
-    in_array "$absolute_path" "${dont_update[@]}"                       # verificar se esse ficherio/diretorio consta na list de ficherios/diretorios a não atualizar
-    ret_val=$?                                                          # valor de retorno da função (1: está no array; 0: não está no array)
-
     if [ -f "$item" ]; then                                             # caso item seja um ficheiro
         file="$item"
 
@@ -115,6 +111,10 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
             ((errors+=1))
             continue
         fi
+
+        absolute_path=$(realpath "$file")                                   # obter path absoluto do ficherio/diretorio para poder verficar se consta na array "dont_update"
+        in_array "$absolute_path" "${dont_update[@]}"                       # verificar se esse ficherio/diretorio consta na list de ficherios/diretorios a não atualizar
+        ret_val=$?                                                          # valor de retorno da função (1: está no array; 0: não está no array)
 
         if [ "$ret_val" -eq 0 ] && [[ "$file" =~ $regexpr ]]; then      # garantir que ficherio n está no array e valida a expressão regular que não sendo passada nenhuma será "\w+" e aceitará qq ficheiro
             
@@ -183,6 +183,10 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
             ((errors+=1))
             continue
         fi 
+
+        absolute_path=$(realpath "$dir")                                   # obter path absoluto do ficherio/diretorio para poder verficar se consta na array "dont_update"
+        in_array "$absolute_path" "${dont_update[@]}"                       # verificar se esse ficherio/diretorio consta na list de ficherios/diretorios a não atualizar
+        ret_val=$?                                                          # valor de retorno da função (1: está no array; 0: não está no array)
         
         if [ "$ret_val" -eq 0 ]; then   
 
