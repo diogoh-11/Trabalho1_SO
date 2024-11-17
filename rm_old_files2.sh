@@ -18,7 +18,7 @@ rm_old_files2(){
     num_deleted_files=0
     bytes_deleted=0
 
-    if ! [ -z "$( ls -A "$dir_backup" )" ]; then             # garante q o dir n está vazio
+    #if ! [ -z "$( ls -A "$dir_backup" )" ]; then             # garante q o dir n está vazio
 
         for item in "$dir_backup"/{*,.*}; do
 
@@ -64,7 +64,7 @@ rm_old_files2(){
                 fi
             fi
         done
-    fi
+    #fi
 
     if $write_to_file; then
         echo "$num_deleted_files" "$bytes_deleted" > "$temp_file"       # escrever valores em ficheiro temporário para serem lidos no script

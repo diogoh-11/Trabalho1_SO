@@ -47,14 +47,33 @@ shift $((OPTIND - 1))               # remove os argumentos iterados no loop ante
 dir_trabalho="$1"                   # diretório de trabalho passado
 dir_backup="$2"                     # diretório de backup passado
 
-if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ]; then
-    echo ">> INVALID ARGUMENTS!!!"
+if [ "$#" -ne 2 ]; then
+    echo ">> INVALID ARGUMENTS!!!"                                                          # Validar número de argumentos igual a 2
     echo "Usage: $0 [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup"
     exit 1
+fi
 
-elif  ! [ -e "$dir_backup" ] || ! [ -d "$dir_backup" ]; then
-    echo -e "WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."
+if [ ! -d "$dir_trabalho" ]; then
+    echo ">> ERROR: Source directory \"$dir_trabalho\" does not exist!"                       # Verificar se a diretoria de trabalho passada existe como diretoria
+    exit 1
+
+elif [ ! -r "$dir_trabalho" ]; then
+    echo ">> ERROR: Source directory \"$dir_trabalho\" does not have read permissions!"       # Garantir que diretoria de trabalho possui permissões de leitura para q se possam acessar os ficheiros
+    exit 1
+fi
+
+if [ ! -e "$dir_backup" ]; then
+    echo ">> WARNING: Backup directory \"$dir_backup\" does not exist. Creating it..."      # Criar diretoria de backup se não existir
     mkdir "$dir_backup"
+
+elif [ ! -d "$dir_backup" ]; then
+    echo ">> ERROR: \"$dir_backup\" exists but is not a directory!"                         # diretoria passada como diretoria de backup não é realmente uma diretoria
+    exit 1
+fi
+
+if [ ! -w "$dir_backup" ] || [ ! -x "$dir_backup" ]; then
+    echo ">> ERROR: Backup directory \"$dir_backup\" does not have sufficient permissions (write and execute)."
+    exit 1
 fi
 
 rm_old_files2 "$dir_trabalho" "$dir_backup" "$checking"            # remove os ficheiros/diretórios que já não estou no diretório de trabalho
@@ -66,12 +85,18 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         continue
     fi
 
+    absolute_path=$(realpath "$item")                               # obter path absoluto do ficherio/diretorio para poder verficar se consta na array "dont_update"
+    in_array "$absolute_path" "${dont_update[@]}"                   # verificar se esse ficherio/diretorio consta na list de ficherios/diretorios a não atualizar
+    ret_val=$?                                                      # valor de retorno da função (1: está no array; 0: não está no array)
+       
     if [ -f "$item" ]; then                                             # caso item seja um ficheiro
         file="$item"
         fname="${file##*/}"                                             # tirar nome do ficheiro
-        absolute_path=$(realpath "$file")                               # obter path absoluto do ficherio para poder verficar se consta na array "dont_update"
-        in_array "$absolute_path" "${dont_update[@]}"                   # verificar se esse ficherio consta na list de ficherios a não atualizar
-        ret_val=$?                                                      # valor de retorno da função (1: está no array; 0: não está no array)
+
+        if [ ! -r "$file" ]; then
+        echo ">> ERROR: File \"$file\" does not have read permissions. Skipping."
+        continue
+    fi
         
         if [ "$ret_val" -eq 0 ] && [[ "$file" =~ $regexpr ]]; then      # garantir que ficherio n está no array e valida a expressão regular que não sendo passada nenhuma será "\w+" e aceitará qq ficheiro
             
@@ -120,10 +145,12 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
     else                                                                    # caso em que "item" é um diretório  precisamos tratar de fazer backup desse diretório recorrendo à chamada recursiva do script nesse novo diretório de trabalho e backup
         dir="$item"     
         subdir_name="${dir##*/}"                                            # extrair nome do diretório
-        absolute_path=$(realpath "$dir")                                    # obter path absoluto do dir para poder verficar se consta na array "dont_update"
-        in_array "$absolute_path" "${dont_update[@]}"                       # verificar se esse diretorio consta na lista de ficherios/diretorios a não atualizar
-        ret_val=$?                                                          # valor de retorno da função (1: está no array; 0: não está no array)
-        
+
+        if [ ! -r "$dir" ] || [ ! -x "$dir" ]; then
+            echo ">> ERROR: Directory \"$dir\" does not have sufficient permissions (read and execute). Skipping."
+            continue
+        fi
+         
         if [ "$ret_val" -eq 0 ]; then 
             
             if [ -e "$dir_backup/$subdir_name" ]; then                          # verifica se existe no diretório de backup um diretório com o mesmo nome
