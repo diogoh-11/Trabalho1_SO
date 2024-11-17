@@ -197,7 +197,7 @@ done
 #fi
 
 if ! $checking; then
-    echo -e "While backuping $dir_trabalho: $errors Errors; $warnings Warnings; $updated Updated; $copied Copied ($bytes_copied B); $deleted Deleted ($bytes_deleted B)"
+    echo -e "While backuping $dir_trabalho: $errors Errors; $warnings Warnings; $updated Updated; $copied Copied (${bytes_copied}B); $deleted Deleted (${bytes_deleted}B)"
 fi
 
 
