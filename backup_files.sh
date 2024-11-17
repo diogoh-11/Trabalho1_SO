@@ -20,19 +20,33 @@ shift $((OPTIND - 1))                                       # remove os argument
 dir_trabalho="$1"
 dir_backup="$2"
 
-if [ $# -ne 2 ] || ! [ -d "$dir_trabalho" ]; then
-    echo "INVALID ARGUMENTS!!!"                                                                  # validação doa argumentos
-    echo "Usage: $0 [-c] dir_trabalho dir_backup"
+if [ "$#" -ne 2 ]; then
+    echo ">> INVALID ARGUMENTS!!!"                                                          # Validar número de argumentos igual a 2
+    echo "Usage: $0 [-c] [-b tfile] [-r regexpr] dir_trabalho dir_backup"
     exit 1
-
-elif  ! [ -e "$dir_backup" ] || ! [ -d "$dir_backup" ]; then
-    echo -e "WARNING: backup directory \"$dir_backup\" does not exist! Creating it..."         # caso não exista o diretorio de backup é criado um
-    mkdir "$dir_backup"
 fi
 
-if [ -z "$( ls -A $dir_trabalho )" ]; then 
-    echo -e "WARNING: source directory \"$dir_trabalho\" is empty!"                       # verificar se diretótio está vazio
-    exit 0
+if [ ! -d "$dir_trabalho" ]; then
+    echo ">> ERROR: Source directory \"$dir_trabalho\" does not exist!"                       # Verificar se a diretoria de trabalho passada existe como diretoria
+    exit 1
+
+elif [ ! -r "$dir_trabalho" ]; then
+    echo ">> ERROR: Source directory \"$dir_trabalho\" does not have read permissions!"       # Garantir que diretoria de trabalho possui permissões de leitura para q se possam acessar os ficheiros
+    exit 1
+fi
+
+if [ ! -e "$dir_backup" ]; then
+    echo ">> WARNING: Backup directory \"$dir_backup\" does not exist. Creating it..."      # Criar diretoria de backup se não existir
+    mkdir "$dir_backup"
+
+elif [ ! -d "$dir_backup" ]; then
+    echo ">> ERROR: \"$dir_backup\" exists but is not a directory!"                         # diretoria passada como diretoria de backup não é realmente uma diretoria
+    exit 1
+fi
+
+if [ ! -w "$dir_backup" ] || [ ! -x "$dir_backup" ]; then
+    echo ">> ERROR: Backup directory \"$dir_backup\" does not have sufficient permissions (write and execute)."
+    exit 1
 fi
 
 rm_old_files2 "$dir_trabalho" "$dir_backup" "$checking"            # remove os ficheiros que já não estao no dir_trabalho da backup
@@ -40,6 +54,11 @@ rm_old_files2 "$dir_trabalho" "$dir_backup" "$checking"            # remove os f
 for file in "$dir_trabalho"/{*,.*}; do
 
     if [[ "$file" == "$dir_trabalho/." || "$file" == "$dir_trabalho/.." || "$file" == "$dir_trabalho/.*" || "$file" == "$dir_trabalho/*" ]]; then       # ignorar ".", ".." e ".*"
+        continue
+    fi
+
+    if [ ! -r "$file" ]; then
+        echo ">> ERROR: File \"$file\" does not have read permissions. Skipping..."
         continue
     fi
 

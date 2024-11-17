@@ -14,11 +14,12 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
             ;;
         b)
             tfile="$OPTARG"                                     # guarda em tfile o nome do ficheiro passado
+            
             if [ -f "$tfile" ] && ! [ -z "$tfile" ]; then       # garante que é um ficheiro e não está vazio antes de iterar pelos ficheiros nele escrito e guardar na array
                 index=0
 
                 while read -r line; do 
-                    if [ -e "$line" ] && [ -r "$file" ]; then                                     # garantir que ficheiro/diretório existe para que se possa usar "realpath"
+                    if [ -e "$line" ] && [ -r "$file" ]; then                   # garantir que ficheiro/diretório existe e tem permissoes de leitura para que se possa usar "realpath"
                         dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
                         index=$(($index+1))
                     fi
@@ -94,7 +95,7 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         fname="${file##*/}"                                             # tirar nome do ficheiro
 
         if [ ! -r "$file" ]; then
-            echo ">> ERROR: File \"$file\" does not have read permissions. Skipping."
+            echo ">> ERROR: File \"$file\" does not have read permissions. Skipping..."
         continue
     fi
         
@@ -147,7 +148,7 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         subdir_name="${dir##*/}"                                            # extrair nome do diretório
 
         if [ ! -r "$dir" ] || [ ! -x "$dir" ]; then
-            echo ">> ERROR: Directory \"$dir\" does not have sufficient permissions (read and execute). Skipping."
+            echo ">> ERROR: Directory \"$dir\" does not have sufficient permissions (read and execute). Skipping..."
             continue
         fi
          

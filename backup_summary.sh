@@ -23,11 +23,12 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
             ;;
         b)
             tfile="$OPTARG"                                     # guarda em tfile o nome do ficheiro passado
+            
             if [ -f "$tfile" ] && ! [ -z "$tfile" ]; then       # garante que é um ficheiro e não está vazio antes de iterar pelos ficheiros nele escrito e guardar na array
                 index=0
 
                  while read -r line; do 
-                    if [ -e "$line" ] && [ -r "$file" ]; then                                     # garantir que ficheiro/diretório existe para que se possa usar "realpath"
+                    if [ -e "$line" ] && [ -r "$file" ]; then                   # garantir que ficheiro/diretório existe e tem permissão de leitura para que se possa usar "realpath"
                         dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
                         index=$(($index+1))
                     fi
@@ -108,17 +109,18 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
 
     if [ -f "$item" ]; then                                             # caso item seja um ficheiro
         file="$item"
-        fname="${file##*/}"                                             # tirar nome do ficheiro
-        file_size=$(wc -c < "$file")                                    # tirar tamanho do ficheiro
 
         if [ ! -r "$file" ]; then
-            echo ">> ERROR: File \"$file\" does not have read permissions. Skipping."
+            echo ">> ERROR: File \"$file\" does not have read permissions. Skipping..."
             ((errors+=1))
             continue
         fi
 
         if [ "$ret_val" -eq 0 ] && [[ "$file" =~ $regexpr ]]; then      # garantir que ficherio n está no array e valida a expressão regular que não sendo passada nenhuma será "\w+" e aceitará qq ficheiro
             
+            fname="${file##*/}"                                             # tirar nome do ficheiro
+            file_size=$(wc -c < "$file")                                    # tirar tamanho do ficheiro
+
             if [ -e "$dir_backup/$fname" ]; then                        # verifica se existe no diretório de backup um ficheiro com o mesmo nome
                 backed_file=$dir_backup/$fname
 
@@ -130,12 +132,9 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
                     
                     else
                         rm "$backed_file"                                                           # remove ficheiro antigo
-                        #((bytes_deleted+=file_size))
                         cp -a "$file" "$dir_backup"                                                 # copia ficheiro mais recente
-                        #((bytes_copied+=file_size))
                         #echo -e "\n>> File \"$file\" was successfully updated!"
                         ((updated+=1))
-                        #echo "rm $backed_file" ??????       
                         echo "cp -a $file $dir_backup/$fname"
                     fi
                 
@@ -180,12 +179,15 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         subdir_name="${dir##*/}"                                            # extrair nome do diretório
 
         if [ ! -r "$dir" ] || [ ! -x "$dir" ]; then
-            echo ">> ERROR: Directory \"$dir\" does not have sufficient permissions (read and execute). Skipping."
+            echo ">> ERROR: Directory \"$dir\" does not have sufficient permissions (read and execute). Skipping..."
             ((errors+=1))
             continue
         fi 
         
         if [ "$ret_val" -eq 0 ]; then   
+
+            dir_size=$(du -sb "$dir" | cut -f1)                 # du retorna o nº de bytes e o nome do dir, então usamos o cut para extrair desse resultado apenas o valore de bytes
+            file_count=$(find "$dir" -type f | wc -l)           # Conta o número de arquivos dentro do diretório  
 
             if [ -e "$dir_backup/$subdir_name" ]; then                          # verifica se existe no diretório de backup um diretório com o mesmo nome
                 backed_dir=$dir_backup/$fname
@@ -212,8 +214,6 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
             fi  
         else 
             if ! $checking; then
-                dir_size=$(du -sb "$dir" | cut -f1)                 # du retorna o nº de bytes e o nome do dir, então usamos o cut para extrair desse resultado apenas o valore de bytes
-                file_count=$(find "$dir" -type f | wc -l)           # Conta o número de arquivos dentro do diretório  
                 ((untouched+=file_count))
                 ((bytes_untouched+=dir_size))
                 #echo -e "\n>> Directory \"$dir\" will not be updated due to user input (tfile)!"   # nome do diretorio conta na lista de ficherios/diretorios a não alterar 
