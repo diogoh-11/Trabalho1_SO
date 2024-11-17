@@ -18,7 +18,7 @@ while getopts "cb:r:" option; do        # itera sobre as opções passadas na li
                 index=0
 
                 while read -r line; do 
-                    if [ -e "$line" ]; then                                     # garantir que ficheiro/diretório existe para que se possa usar "realpath"
+                    if [ -e "$line" ] && [ -r "$file" ]; then                                     # garantir que ficheiro/diretório existe para que se possa usar "realpath"
                         dont_update[$index]=$(realpath "$line")                 # coloca no array "dont_update" path absoluto dos ficheiros que não serão atualizados no backup
                         index=$(($index+1))
                     fi
@@ -94,7 +94,7 @@ for item in "$dir_trabalho"/{*,.*}; do                       # iterar por todos 
         fname="${file##*/}"                                             # tirar nome do ficheiro
 
         if [ ! -r "$file" ]; then
-        echo ">> ERROR: File \"$file\" does not have read permissions. Skipping."
+            echo ">> ERROR: File \"$file\" does not have read permissions. Skipping."
         continue
     fi
         
