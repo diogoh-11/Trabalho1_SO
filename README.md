@@ -52,6 +52,7 @@ Este projeto contém um conjunto de scripts Bash desenvolvidos para realizar ope
 - Usa o comando `md5sum` para comparar os conteúdos.
 - Não realiza cópias nem verifica novos arquivos.
 
+
 ```bash
 ./backup_check.sh dir_trabalho dir_backup
 ```
